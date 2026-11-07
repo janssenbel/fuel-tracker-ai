@@ -6,7 +6,7 @@ import {VitePWA} from 'vite-plugin-pwa';
 
 export default defineConfig(() => {
   return {
-    base: '/fuel-tracker-ai/', //
+    base: '/fuel-tracker-ai/',
     plugins: [
       react(),
       tailwindcss(),
