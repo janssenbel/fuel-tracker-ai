@@ -14,36 +14,41 @@ export default defineConfig(() => {
         registerType: 'autoUpdate',
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon.svg'],
         manifest: {
-          id: '/fuel-tracker-ai/',
-          name: 'FuelTracker PH',
-          short_name: 'FuelTracker',
-          description: 'Multi-vehicle fuel consumption (km/L) and expense tracker with offline access.',
-          theme_color: '#0b1120',
-          background_color: '#0b1120',
-          display: 'standalone',
-          start_url: '/',
-          scope: '/',
-          icons: [
-            {
-              src: '/pwa-192x192.png',
-              sizes: '192x192',
-              type: 'image/png',
-              purpose: 'any',
-            },
-            {
-              src: '/pwa-512x512.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any',
-            },
-            {
-              src: '/pwa-maskable-512x512.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'maskable',
-            },
-          ],
-        },
+  id: '/fuel-tracker-ai/',
+  name: 'FuelTracker PH',
+  short_name: 'FuelTracker',
+
+  description: 'Multi-vehicle fuel consumption (km/L) and expense tracker with offline access.',
+
+  theme_color: '#0b1120',
+  background_color: '#0b1120',
+
+  display: 'standalone',
+
+  start_url: '/fuel-tracker-ai/',
+  scope: '/fuel-tracker-ai/',
+
+  icons: [
+    {
+      src: '/fuel-tracker-ai/pwa-192x192.png',
+      sizes: '192x192',
+      type: 'image/png',
+      purpose: 'any',
+    },
+    {
+      src: '/fuel-tracker-ai/pwa-512x512.png',
+      sizes: '512x512',
+      type: 'image/png',
+      purpose: 'any',
+    },
+    {
+      src: '/fuel-tracker-ai/pwa-maskable-512x512.png',
+      sizes: '512x512',
+      type: 'image/png',
+      purpose: 'maskable',
+    },
+  ],
+},
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
           runtimeCaching: [
