@@ -4,6 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FuelTracker PH - Fuel Consumption & Expense Tracker</title>
+    <script type="text/javascript">
+      (function() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var p = urlParams.get('p');
+        if (p) {
+          // Get the base repository path (e.g., /fuel-tracker-ai)
+          var repoPath = window.location.pathname.replace(/\/$/, '');
+          var targetUrl = repoPath + p;
+          
+          // Restore any extra query parameters if they were preserved as 'q'
+          var q = urlParams.get('q');
+          if (q) {
+            targetUrl += '?' + q;
+          }
+          targetUrl += window.location.hash;
+          
+          // Update the browser history state so the router sees the correct URL
+          window.history.replaceState(null, null, targetUrl);
+        }
+      })();
+    </script>
     <meta name="description" content="Multi-vehicle fuel consumption, economy (km/L), and expense tracker with weekly/monthly summaries and automated JSON backup." />
     <meta property="og:title" content="FuelTracker PH - Fuel Consumption & Expense Tracker" />
     <meta property="og:description" content="Multi-vehicle fuel consumption, economy (km/L), and expense tracker with weekly/monthly summaries and automated JSON backup." />
