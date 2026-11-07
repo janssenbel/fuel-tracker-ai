@@ -14,7 +14,7 @@ export default defineConfig(() => {
         registerType: 'autoUpdate',
         includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon.svg'],
         manifest: {
-          id: '/',
+          id: '/fuel-tracker-ai/',
           name: 'FuelTracker PH',
           short_name: 'FuelTracker',
           description: 'Multi-vehicle fuel consumption (km/L) and expense tracker with offline access.',
