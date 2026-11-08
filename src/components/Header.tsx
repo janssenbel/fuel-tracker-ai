@@ -23,55 +23,59 @@ export const Header: React.FC<HeaderProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+    <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3.5 pb-4 border-b border-slate-800">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
           <Fuel className="w-5 h-5" />
         </div>
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-white">FuelTracker PH</h1>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-700/60 text-emerald-300">
+          <div className="flex items-baseline gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white whitespace-nowrap">
+              FuelTracker PH
+            </h1>
+            <span className="text-xs font-medium text-emerald-400 whitespace-nowrap">
               km/L · ₱
             </span>
           </div>
           <p className="text-slate-400 text-xs mt-0.5">
-            Multi-vehicle mileage, fuel economy (km/L), and expense tracking
+            Multi-vehicle mileage, fuel economy, and expense tracker
           </p>
         </div>
       </div>
 
-      {/* BelBros-style Action Buttons + PWA Install */}
-      <div className="flex items-center gap-2 w-full md:w-auto justify-end flex-wrap">
-        <PWAInstallButton />
+      {/* Action Buttons + PWA Install */}
+      <div className="grid grid-cols-3 sm:flex items-center gap-2 w-full md:w-auto justify-end">
+        <div className="col-span-3 sm:col-span-1 flex justify-end empty:hidden">
+          <PWAInstallButton />
+        </div>
 
         <button
           type="button"
           onClick={onOpenVehicleModal}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow cursor-pointer whitespace-nowrap"
+          className="min-h-[42px] sm:min-h-[36px] flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl sm:rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 active:scale-[0.98] text-slate-200 border border-slate-700 transition shadow cursor-pointer whitespace-nowrap"
         >
-          <CarFront className="w-3.5 h-3.5 text-slate-400" />
+          <CarFront className="w-3.5 h-3.5 text-slate-400 shrink-0" />
           <span>Garage ({vehicleCount})</span>
         </button>
 
         <button
           type="button"
           onClick={onExportBackup}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition shadow cursor-pointer whitespace-nowrap"
+          className="min-h-[42px] sm:min-h-[36px] flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl sm:rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white transition shadow cursor-pointer whitespace-nowrap"
           title="Download all vehicles and fill-up records as a JSON file"
         >
-          <Download className="w-3.5 h-3.5" />
-          <span>Backup (JSON)</span>
+          <Download className="w-3.5 h-3.5 shrink-0" />
+          <span>Backup</span>
         </button>
 
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow cursor-pointer whitespace-nowrap"
+          className="min-h-[42px] sm:min-h-[36px] flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl sm:rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 active:scale-[0.98] text-slate-200 border border-slate-700 transition shadow cursor-pointer whitespace-nowrap"
           title="Restore previous JSON backup file"
         >
-          <Upload className="w-3.5 h-3.5 text-slate-400" />
-          <span>Import / Restore</span>
+          <Upload className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          <span>Restore</span>
         </button>
 
         <input
