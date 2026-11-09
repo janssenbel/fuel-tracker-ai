@@ -17,6 +17,11 @@ import { SummarySection } from './components/SummarySection';
 import { HistoryTable } from './components/HistoryTable';
 import { VehicleManagerModal } from './components/VehicleManagerModal';
 import { EditLogModal } from './components/EditLogModal';
+import {
+  SettingsModal,
+  DEFAULT_APP_NAME,
+  DEFAULT_APP_SUBTITLE,
+} from './components/SettingsModal';
 import { Toast } from './components/Toast';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import {
@@ -35,8 +40,11 @@ const STORAGE_KEYS = {
   VEHICLES: 'fueltracker_vehicles_v2',
   LOGS: 'fueltracker_logs_v2',
   OLD_LOGS: 'fuel_logs_ph',
-  AUTO_BACKUP: 'fueltracker_autobackup_v2',
+  AUTO_BACKUP: 'fueltracker_autobackup_v3',
+  DEFAULT_FULL_TANK: 'fueltracker_default_fulltank_v3',
   ACTIVE_FILTER: 'fueltracker_filter_v2',
+  APP_NAME: 'fueltracker_app_name_v2',
+  APP_SUBTITLE: 'fueltracker_app_subtitle_v2',
 };
 
 function sanitizeVehicles(raw: unknown): Vehicle[] {
@@ -80,7 +88,7 @@ function sanitizeLogs(raw: unknown): FuelLog[] {
       odometer: Number(l.odometer),
       volume: Number(l.volume),
       cost: Number(l.cost || 0),
-      isFullTank: l.isFullTank !== false,
+      isFullTank: Boolean(l.isFullTank),
       station: l.station ? String(l.station) : undefined,
       notes: l.notes ? String(l.notes) : undefined,
       createdAt: l.createdAt ? String(l.createdAt) : undefined,
@@ -98,6 +106,15 @@ function sanitizeLogs(raw: unknown): FuelLog[] {
 }
 
 export default function App() {
+  // --- App Branding Settings State ---
+  const [appName, setAppName] = useState<string>(() => {
+    return localStorage.getItem(STORAGE_KEYS.APP_NAME) || DEFAULT_APP_NAME;
+  });
+
+  const [appSubtitle, setAppSubtitle] = useState<string>(() => {
+    return localStorage.getItem(STORAGE_KEYS.APP_SUBTITLE) || DEFAULT_APP_SUBTITLE;
+  });
+
   // --- Vehicles State ---
   const [vehicles, setVehicles] = useState<Vehicle[]>(() => {
     try {
@@ -124,10 +141,16 @@ export default function App() {
     return [];
   });
 
-  // --- Auto-Backup Checkbox Preference ---
+  // --- Default Full Tank Checkbox Preference (Unchecked by default) ---
+  const [defaultFullTank, setDefaultFullTank] = useState<boolean>(() => {
+    const val = localStorage.getItem(STORAGE_KEYS.DEFAULT_FULL_TANK);
+    return val !== null ? val === 'true' : false;
+  });
+
+  // --- Auto-Backup Checkbox Preference (Unchecked by default) ---
   const [autoBackupEnabled, setAutoBackupEnabled] = useState<boolean>(() => {
     const val = localStorage.getItem(STORAGE_KEYS.AUTO_BACKUP);
-    return val !== null ? val === 'true' : true;
+    return val !== null ? val === 'true' : false;
   });
 
   // --- Selected Vehicle Filter ('all' or vehicleId) ---
@@ -137,6 +160,7 @@ export default function App() {
 
   // --- Modal & Toast States ---
   const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [editingLog, setEditingLog] = useState<ComputedFuelLog | null>(null);
   const [activeMobileTab, setActiveMobileTab] = useState<'form' | 'summary' | 'history'>('form');
   const [toast, setToast] = useState<{ message: string | null; isError: boolean }>({
@@ -151,7 +175,17 @@ export default function App() {
     }, 4000);
   }, []);
 
-  // Sync to LocalStorage
+  // Sync App Name & Subtitle to LocalStorage and document.title
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.APP_NAME, appName);
+    document.title = `${appName} — Multi-Vehicle Fuel & Expense Tracker`;
+  }, [appName]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.APP_SUBTITLE, appSubtitle);
+  }, [appSubtitle]);
+
+  // Sync Vehicles, Logs, Preferences to LocalStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.VEHICLES, JSON.stringify(vehicles));
   }, [vehicles]);
@@ -159,6 +193,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(logs));
   }, [logs]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.DEFAULT_FULL_TANK, String(defaultFullTank));
+  }, [defaultFullTank]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.AUTO_BACKUP, String(autoBackupEnabled));
@@ -247,7 +285,7 @@ export default function App() {
     setLogs(updatedLogs);
 
     if (shouldAutoBackup) {
-      exportBackupJSON(vehicles, updatedLogs, true);
+      exportBackupJSON(vehicles, updatedLogs, true, appName);
       showToast('✔ Fill-up saved and backup JSON file auto-downloaded!');
     } else {
       showToast('✔ Fill-up record saved successfully!');
@@ -324,9 +362,23 @@ export default function App() {
     showToast('Primary vehicle updated.');
   };
 
+  // --- Handlers: Settings Update ---
+  const handleSaveSettings = (settings: {
+    appName: string;
+    appSubtitle: string;
+    defaultFullTank: boolean;
+    autoBackupEnabled: boolean;
+  }) => {
+    setAppName(settings.appName);
+    setAppSubtitle(settings.appSubtitle);
+    setDefaultFullTank(settings.defaultFullTank);
+    setAutoBackupEnabled(settings.autoBackupEnabled);
+    showToast('✔ Settings saved!');
+  };
+
   // --- Handlers: BelBros Backup & Restore ---
   const handleExportBackup = () => {
-    const ok = exportBackupJSON(vehicles, logs, false);
+    const ok = exportBackupJSON(vehicles, logs, false, appName);
     if (ok) {
       showToast('✔ Backup JSON downloaded successfully!');
     }
@@ -357,6 +409,10 @@ export default function App() {
           );
 
           if (!confirmed) return;
+
+          if (typeof parsed.appName === 'string' && parsed.appName.trim()) {
+            setAppName(parsed.appName.trim());
+          }
 
           // Merge vehicles
           const mergedVehicles = [...vehicles];
@@ -427,7 +483,7 @@ export default function App() {
             odometer: Number(item.odometer),
             volume: Number(item.volume),
             cost: Number(item.cost || 0),
-            isFullTank: item.isFullTank !== false,
+            isFullTank: Boolean(item.isFullTank),
             station: item.station || 'Station',
             notes: item.notes || '',
           }));
@@ -462,16 +518,20 @@ export default function App() {
       : 'Selected Vehicle';
 
   return (
-    <div className="min-h-screen bg-[#0b1120] text-slate-100 pt-4 pb-24 md:py-6 px-3.5 sm:px-6 lg:px-8">
-      <div id="section-top" className="max-w-5xl mx-auto space-y-5 sm:space-y-6">
-        {/* Top Header with BelBros Backup / Restore */}
-        <Header
-          vehicleCount={vehicles.length}
-          onOpenVehicleModal={() => setIsVehicleModalOpen(true)}
-          onExportBackup={handleExportBackup}
-          onImportBackup={handleImportBackup}
-        />
+    <div id="section-top" className="min-h-screen bg-[#0b1120] text-slate-100 pb-24 md:pb-10">
+      {/* Sticky Frosted-Glass Top Header */}
+      <Header
+        appName={appName}
+        appSubtitle={appSubtitle}
+        vehicleCount={vehicles.length}
+        onOpenVehicleModal={() => setIsVehicleModalOpen(true)}
+        onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
+        onExportBackup={handleExportBackup}
+        onImportBackup={handleImportBackup}
+      />
 
+      {/* Main Content Container */}
+      <main className="max-w-5xl mx-auto pt-4 sm:pt-6 px-3.5 sm:px-6 lg:px-8 space-y-5 sm:space-y-6">
         {/* Vehicle Filter Bar & Quick Switcher */}
         <section className="bg-slate-900/80 border border-slate-800 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-lg">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
@@ -606,6 +666,7 @@ export default function App() {
             selectedVehicleId={selectedVehicleId}
             latestOdometerMap={latestOdometerMap}
             onAddLog={handleAddLog}
+            defaultFullTank={defaultFullTank}
             autoBackupDefault={autoBackupEnabled}
             onToggleAutoBackup={setAutoBackupEnabled}
             onOpenVehicleModal={() => setIsVehicleModalOpen(true)}
@@ -630,18 +691,18 @@ export default function App() {
         {/* Footer info */}
         <footer className="text-center text-xs text-slate-500 pt-2 pb-6 space-y-1">
           <p>
-            FuelTracker PH · Kilometer per Liter (km/L) & Philippine Peso (₱) Expense Ledger
+            {appName} · Kilometer per Liter (km/L) & Philippine Peso (₱) Expense Ledger
           </p>
           <p className="text-[11px] text-slate-600">
             Trip distances and fuel economy are strictly isolated per vehicle odometer stream.
           </p>
         </footer>
-      </div>
+      </main>
 
       {/* iPhone & Mobile Thumb-Zone Bottom Tab Bar */}
       <nav
         aria-label="Mobile quick navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 pb-safe-nav"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 nav-frosted border-t border-slate-800 pb-safe-nav"
       >
         <div className="grid grid-cols-4 items-center h-14 max-w-md mx-auto px-2">
           <button
@@ -705,6 +766,17 @@ export default function App() {
         onUpdateVehicle={handleUpdateVehicle}
         onDeleteVehicle={handleDeleteVehicle}
         onSetDefault={handleSetDefaultVehicle}
+      />
+
+      {/* App Settings & Rename Modal */}
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        appName={appName}
+        appSubtitle={appSubtitle}
+        defaultFullTank={defaultFullTank}
+        autoBackupEnabled={autoBackupEnabled}
+        onSaveSettings={handleSaveSettings}
       />
 
       {/* Edit Log Modal */}

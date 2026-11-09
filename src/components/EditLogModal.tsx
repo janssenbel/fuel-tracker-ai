@@ -84,7 +84,7 @@ export const EditLogModal: React.FC<EditLogModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4">
+    <div className="fixed inset-0 z-50 modal-backdrop flex items-end sm:items-center justify-center sm:p-4">
       <div className="bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-2xl max-w-lg w-full max-h-[90dvh] flex flex-col shadow-2xl overflow-hidden">
         {/* Mobile Bottom Sheet Drag Handle */}
         <div className="w-10 h-1.5 bg-slate-700 rounded-full mx-auto mt-3 sm:hidden shrink-0" />

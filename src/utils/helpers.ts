@@ -140,7 +140,7 @@ export function computeVehicleIsolatedLogs(
       if (index > 0 && prevOdo !== null) {
         deltaDist = log.odometer - prevOdo;
         if (deltaDist > 0) {
-          if (log.isFullTank && log.volume > 0) {
+          if (log.volume > 0) {
             // km / L (Higher is better)
             economy = deltaDist / log.volume;
           }
@@ -246,7 +246,8 @@ export function computeSummaries(
 export function exportBackupJSON(
   vehicles: Vehicle[],
   logs: FuelLog[],
-  isAuto = false
+  isAuto = false,
+  customAppName = 'FuelTracker PH'
 ): boolean {
   if (logs.length === 0 && vehicles.length === 0) {
     if (!isAuto) {
@@ -258,7 +259,7 @@ export function exportBackupJSON(
   try {
     const payload: BackupData = {
       version: 2,
-      appName: 'FuelTracker PH',
+      appName: customAppName || 'FuelTracker PH',
       exportedAt: new Date().toISOString(),
       vehicles,
       logs,

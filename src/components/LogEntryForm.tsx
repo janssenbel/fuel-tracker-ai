@@ -13,6 +13,7 @@ interface LogEntryFormProps {
   selectedVehicleId: string;
   latestOdometerMap: Record<string, number>;
   onAddLog: (log: Omit<FuelLog, 'id'>, autoBackup: boolean) => void;
+  defaultFullTank: boolean;
   autoBackupDefault: boolean;
   onToggleAutoBackup: (enabled: boolean) => void;
   onOpenVehicleModal?: () => void;
@@ -23,6 +24,7 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({
   selectedVehicleId,
   latestOdometerMap,
   onAddLog,
+  defaultFullTank,
   autoBackupDefault,
   onToggleAutoBackup,
   onOpenVehicleModal,
@@ -38,9 +40,13 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({
   const [odometer, setOdometer] = useState<string>('');
   const [volume, setVolume] = useState<string>('');
   const [cost, setCost] = useState<string>('');
-  const [isFullTank, setIsFullTank] = useState(true);
+  const [isFullTank, setIsFullTank] = useState<boolean>(defaultFullTank);
   const [station, setStation] = useState<string>('Petron');
   const [notes, setNotes] = useState<string>('');
+
+  useEffect(() => {
+    setIsFullTank(defaultFullTank);
+  }, [defaultFullTank]);
 
   // Keep vehicleId synchronized when vehicles list or active filter changes
   useEffect(() => {
@@ -113,6 +119,7 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({
     setVolume('');
     setCost('');
     setNotes('');
+    setIsFullTank(defaultFullTank);
   };
 
   if (vehicles.length === 0) {
