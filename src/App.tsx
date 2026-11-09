@@ -89,6 +89,10 @@ function sanitizeLogs(raw: unknown): FuelLog[] {
       volume: Number(l.volume),
       cost: Number(l.cost || 0),
       isFullTank: Boolean(l.isFullTank),
+      pricePerLiter:
+        !isNaN(Number(l.pricePerLiter)) && Number(l.pricePerLiter) > 0
+          ? Number(l.pricePerLiter)
+          : undefined,
       station: l.station ? String(l.station) : undefined,
       notes: l.notes ? String(l.notes) : undefined,
       createdAt: l.createdAt ? String(l.createdAt) : undefined,
@@ -248,11 +252,13 @@ export default function App() {
   const kpis = useMemo(() => {
     let totalDist = 0;
     let totalCost = 0;
+    let totalVolume = 0;
     const validEconomies: number[] = [];
 
     displayComputedLogs.forEach((l) => {
       if (l.deltaDist > 0) totalDist += l.deltaDist;
       totalCost += Number(l.cost || 0);
+      totalVolume += Number(l.volume || 0);
       if (l.economy !== null && !isNaN(l.economy) && l.economy > 0) {
         validEconomies.push(l.economy);
       }
@@ -264,12 +270,17 @@ export default function App() {
         : null;
 
     const avgCostPerDist = totalDist > 0 ? totalCost / totalDist : null;
+    const avgFuelPrice = totalVolume > 0 ? totalCost / totalVolume : null;
+    const latestFuelPrice = displayComputedLogs[0]?.pricePerLiter || null;
 
     return {
       totalDist,
       totalCost,
+      totalVolume,
       avgEconomy,
       avgCostPerDist,
+      avgFuelPrice,
+      latestFuelPrice,
     };
   }, [displayComputedLogs]);
 
@@ -588,8 +599,8 @@ export default function App() {
           </div>
         </section>
 
-        {/* Top 4 KPI Metric Cards */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        {/* Top 5 KPI Metric Cards */}
+        <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           {/* 1. Avg Economy (km/L) */}
           <div className="bg-slate-900/90 p-3.5 sm:p-4 rounded-2xl sm:rounded-xl border border-slate-800 shadow-md">
             <div className="flex items-center justify-between">
@@ -608,7 +619,27 @@ export default function App() {
             </span>
           </div>
 
-          {/* 2. Total Distance (km) */}
+          {/* 2. Avg Fuel Price (₱/L) - Average cost of fuel over time */}
+          <div className="bg-slate-900/90 p-3.5 sm:p-4 rounded-2xl sm:rounded-xl border border-slate-800 shadow-md">
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] text-slate-400 uppercase font-semibold tracking-wider">
+                Avg Fuel Price
+              </p>
+              <Fuel className="w-4 h-4 text-emerald-400 shrink-0" />
+            </div>
+            <p className="text-xl sm:text-2xl font-bold mt-1 text-emerald-400 font-mono tabular-nums">
+              {kpis.avgFuelPrice !== null
+                ? `${formatPHP(kpis.avgFuelPrice)}/L`
+                : '--'}
+            </p>
+            <span className="text-[11px] text-slate-500 block truncate">
+              {kpis.latestFuelPrice !== null
+                ? `Latest: ${formatPHP(kpis.latestFuelPrice)}/L`
+                : 'Avg cost of fuel over time'}
+            </span>
+          </div>
+
+          {/* 3. Total Distance (km) */}
           <div className="bg-slate-900/90 p-3.5 sm:p-4 rounded-2xl sm:rounded-xl border border-slate-800 shadow-md">
             <div className="flex items-center justify-between">
               <p className="text-[11px] text-slate-400 uppercase font-semibold tracking-wider">
@@ -624,7 +655,7 @@ export default function App() {
             </span>
           </div>
 
-          {/* 3. Total Spent in Philippine Pesos (₱) */}
+          {/* 4. Total Spent in Philippine Pesos (₱) */}
           <div className="bg-slate-900/90 p-3.5 sm:p-4 rounded-2xl sm:rounded-xl border border-slate-800 shadow-md">
             <div className="flex items-center justify-between">
               <p className="text-[11px] text-slate-400 uppercase font-semibold tracking-wider">
@@ -640,8 +671,8 @@ export default function App() {
             </span>
           </div>
 
-          {/* 4. Cost per km (₱/km) */}
-          <div className="bg-slate-900/90 p-3.5 sm:p-4 rounded-2xl sm:rounded-xl border border-slate-800 shadow-md">
+          {/* 5. Cost per km (₱/km) */}
+          <div className="col-span-2 sm:col-span-1 lg:col-span-1 bg-slate-900/90 p-3.5 sm:p-4 rounded-2xl sm:rounded-xl border border-slate-800 shadow-md">
             <div className="flex items-center justify-between">
               <p className="text-[11px] text-slate-400 uppercase font-semibold tracking-wider">
                 Avg Cost / Dist

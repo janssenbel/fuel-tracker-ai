@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ComputedFuelLog } from '../types';
 import { computeSummaries, formatPHP, formatKm, formatLitres } from '../utils/helpers';
-import { Calendar, BarChart3 } from 'lucide-react';
+import { Calendar, BarChart3, Fuel, TrendingUp } from 'lucide-react';
 
 interface SummarySectionProps {
   computedLogs: ComputedFuelLog[];
@@ -21,6 +21,34 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
 
   const summaries = computeSummaries(computedLogs, summaryView);
 
+  // Overall Fuel Cost Over Time analytics
+  const fuelCostStats = useMemo(() => {
+    let totalCost = 0;
+    let totalFuel = 0;
+    const validPrices: number[] = [];
+
+    computedLogs.forEach((l) => {
+      totalCost += Number(l.cost || 0);
+      totalFuel += Number(l.volume || 0);
+      if (typeof l.pricePerLiter === 'number' && l.pricePerLiter > 0) {
+        validPrices.push(l.pricePerLiter);
+      }
+    });
+
+    const avgFuelPrice = totalFuel > 0 ? totalCost / totalFuel : null;
+    const latestFuelPrice = computedLogs[0]?.pricePerLiter || null;
+    const minPrice = validPrices.length > 0 ? Math.min(...validPrices) : null;
+    const maxPrice = validPrices.length > 0 ? Math.max(...validPrices) : null;
+
+    return {
+      avgFuelPrice,
+      latestFuelPrice,
+      minPrice,
+      maxPrice,
+      hasData: computedLogs.length > 0,
+    };
+  }, [computedLogs]);
+
   return (
     <section
       id="section-summary"
@@ -33,14 +61,14 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
               <BarChart3 className="w-4 h-4" />
             </div>
             <h2 className="text-base sm:text-lg font-bold text-white">
-              Aggregated Summary
+              Aggregated Summary & Fuel Cost Trends
             </h2>
             <span className="text-xs text-slate-400 font-medium hidden sm:inline">
               · {selectedVehicleName}
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-0.5">
-            Periodic consumption, spending, and fuel efficiency trends
+            Periodic consumption, average cost of fuel over time, and fuel efficiency trends
           </p>
         </div>
 
@@ -71,6 +99,69 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
         </div>
       </div>
 
+      {/* Fuel Cost Over Time Analytics Bar */}
+      {fuelCostStats.hasData && fuelCostStats.avgFuelPrice !== null && (
+        <div className="bg-slate-950/60 border-b border-slate-800 px-4 py-3 sm:px-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div>
+              <span className="text-[10px] uppercase font-semibold text-slate-400 flex items-center gap-1">
+                <Fuel className="w-3 h-3 text-emerald-400" />
+                Avg Fuel Cost Over Time
+              </span>
+              <p className="text-base sm:text-lg font-bold text-emerald-400 font-mono tabular-nums mt-0.5">
+                {formatPHP(fuelCostStats.avgFuelPrice)}/L
+              </p>
+              <span className="text-[10px] text-slate-500">
+                Weighted all-time average
+              </span>
+            </div>
+
+            <div>
+              <span className="text-[10px] uppercase font-semibold text-slate-400 flex items-center gap-1">
+                <TrendingUp className="w-3 h-3 text-slate-400" />
+                Latest Fill-Up Price
+              </span>
+              <p className="text-base sm:text-lg font-bold text-slate-200 font-mono tabular-nums mt-0.5">
+                {fuelCostStats.latestFuelPrice !== null
+                  ? `${formatPHP(fuelCostStats.latestFuelPrice)}/L`
+                  : '--'}
+              </p>
+              <span className="text-[10px] text-slate-500">
+                Most recent noted price
+              </span>
+            </div>
+
+            <div>
+              <span className="text-[10px] uppercase font-semibold text-slate-400">
+                Lowest Price Noted
+              </span>
+              <p className="text-base sm:text-lg font-bold text-slate-300 font-mono tabular-nums mt-0.5">
+                {fuelCostStats.minPrice !== null
+                  ? `${formatPHP(fuelCostStats.minPrice)}/L`
+                  : '--'}
+              </p>
+              <span className="text-[10px] text-slate-500">
+                Best price logged
+              </span>
+            </div>
+
+            <div>
+              <span className="text-[10px] uppercase font-semibold text-slate-400">
+                Highest Price Noted
+              </span>
+              <p className="text-base sm:text-lg font-bold text-slate-300 font-mono tabular-nums mt-0.5">
+                {fuelCostStats.maxPrice !== null
+                  ? `${formatPHP(fuelCostStats.maxPrice)}/L`
+                  : '--'}
+              </p>
+              <span className="text-[10px] text-slate-500">
+                Peak price logged
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* iPhone & Mobile Card List (< 640px) */}
       <div className="sm:hidden divide-y divide-slate-800/80">
         {summaries.map((item) => (
@@ -85,33 +176,49 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2.5 pt-1 text-xs font-mono tabular-nums">
+            <div className="grid grid-cols-3 gap-2 pt-1 text-xs font-mono tabular-nums">
+              {/* Total Spent */}
               <div className="bg-slate-800/40 rounded-xl p-2.5 border border-slate-800">
                 <span className="block text-[10px] font-sans uppercase text-slate-500">
                   Total Spent
                 </span>
-                <span className="text-emerald-400 font-bold text-sm">
+                <span className="text-emerald-400 font-bold text-sm block truncate">
                   {formatPHP(item.totalCost)}
                 </span>
-                <span className="block text-[11px] text-slate-400 mt-0.5">
+                <span className="block text-[10px] text-slate-400 mt-0.5 truncate">
                   {formatLitres(item.totalFuel)}
                 </span>
               </div>
 
+              {/* Avg Fuel Price Over This Period */}
               <div className="bg-slate-800/40 rounded-xl p-2.5 border border-slate-800">
                 <span className="block text-[10px] font-sans uppercase text-slate-500">
-                  Avg Efficiency
+                  Avg Fuel Price
+                </span>
+                <span className="text-slate-100 font-bold text-sm block truncate">
+                  {item.avgFuelPrice !== null
+                    ? `${formatPHP(item.avgFuelPrice)}/L`
+                    : '—'}
+                </span>
+                <span className="block text-[10px] text-slate-500 mt-0.5 truncate">
+                  Period cost/L
+                </span>
+              </div>
+
+              {/* Avg Efficiency */}
+              <div className="bg-slate-800/40 rounded-xl p-2.5 border border-slate-800">
+                <span className="block text-[10px] font-sans uppercase text-slate-500">
+                  Avg Economy
                 </span>
                 {item.avgEconomy !== null && item.avgEconomy > 0 ? (
-                  <span className="text-emerald-400 font-bold text-sm">
+                  <span className="text-emerald-400 font-bold text-sm block truncate">
                     {item.avgEconomy.toFixed(2)} km/L
                   </span>
                 ) : (
-                  <span className="text-slate-500 text-sm">—</span>
+                  <span className="text-slate-500 text-sm block">—</span>
                 )}
-                <span className="block text-[11px] text-slate-400 mt-0.5">
+                <span className="block text-[10px] text-slate-400 mt-0.5 truncate">
                   {item.totalDistance > 0 ? formatKm(item.totalDistance) : '0 km'}
-                  {item.avgCostPerKm !== null ? ` · ${formatPHP(item.avgCostPerKm)}/km` : ''}
                 </span>
               </div>
             </div>
@@ -129,6 +236,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
               <th className="px-4 py-3 text-right">Distance</th>
               <th className="px-4 py-3 text-right">Total Fuel</th>
               <th className="px-4 py-3 text-right">Total Spent</th>
+              <th className="px-4 py-3 text-right">Avg. Fuel Price</th>
               <th className="px-4 py-3 text-right">Avg. Efficiency</th>
               <th className="px-4 py-3 text-right">Avg. Cost / km</th>
             </tr>
@@ -156,6 +264,14 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                 </td>
                 <td className="px-4 py-3 text-right text-emerald-400 font-semibold tabular-nums">
                   {formatPHP(item.totalCost)}
+                </td>
+                {/* Average Fuel Price for this period */}
+                <td className="px-4 py-3 text-right text-slate-100 font-semibold tabular-nums">
+                  {item.avgFuelPrice !== null ? (
+                    `${formatPHP(item.avgFuelPrice)}/L`
+                  ) : (
+                    <span className="text-slate-600">—</span>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-right tabular-nums">
                   {item.avgEconomy !== null && item.avgEconomy > 0 ? (

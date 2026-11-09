@@ -135,7 +135,12 @@ export function computeVehicleIsolatedLogs(
       let deltaDist = 0;
       let economy: number | null = null;
       let costPerDist: number | null = null;
-      const pricePerLiter = log.volume > 0 ? log.cost / log.volume : 0;
+      const pricePerLiter =
+        typeof log.pricePerLiter === 'number' && log.pricePerLiter > 0
+          ? log.pricePerLiter
+          : log.volume > 0
+          ? log.cost / log.volume
+          : 0;
 
       if (index > 0 && prevOdo !== null) {
         deltaDist = log.odometer - prevOdo;
@@ -222,6 +227,7 @@ export function computeSummaries(
     }
 
     const avgCostPerKm = totalDist > 0 ? totalCost / totalDist : null;
+    const avgFuelPrice = totalFuel > 0 ? totalCost / totalFuel : null;
 
     summaries.push({
       periodKey: key,
@@ -231,6 +237,7 @@ export function computeSummaries(
       totalCost,
       avgEconomy,
       avgCostPerKm,
+      avgFuelPrice,
       count: val.logs.length,
     });
   });

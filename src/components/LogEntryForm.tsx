@@ -6,7 +6,7 @@
 import React, { useState, useId, useEffect } from 'react';
 import { Vehicle, FuelLog } from '../types';
 import { FUEL_STATIONS, formatPHP, getTodayString } from '../utils/helpers';
-import { PlusCircle, Fuel, Zap } from 'lucide-react';
+import { PlusCircle, Fuel, Zap, Calculator } from 'lucide-react';
 
 interface LogEntryFormProps {
   vehicles: Vehicle[];
@@ -38,6 +38,7 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({
   });
   const [date, setDate] = useState(getTodayString());
   const [odometer, setOdometer] = useState<string>('');
+  const [pricePerLiter, setPricePerLiter] = useState<string>('');
   const [volume, setVolume] = useState<string>('');
   const [cost, setCost] = useState<string>('');
   const [isFullTank, setIsFullTank] = useState<boolean>(defaultFullTank);
@@ -67,11 +68,59 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({
   const currentVehicleLatestOdo: number | null =
     typeof rawLatestOdo === 'number' && !isNaN(rawLatestOdo) ? rawLatestOdo : null;
 
-  // Real-time calculation of fuel price per liter
+  // Smart 3-way bidirectional auto-calculation between Price/L, Liters, and Total Cost
+  const handlePriceChange = (val: string) => {
+    setPricePerLiter(val);
+    const p = parseFloat(val);
+    const v = parseFloat(volume);
+    const c = parseFloat(cost);
+    if (!isNaN(p) && p > 0) {
+      if (!isNaN(v) && v > 0) {
+        setCost((p * v).toFixed(2));
+      } else if (!isNaN(c) && c > 0) {
+        setVolume((c / p).toFixed(2));
+      }
+    }
+  };
+
+  const handleVolumeChange = (val: string) => {
+    setVolume(val);
+    const v = parseFloat(val);
+    const p = parseFloat(pricePerLiter);
+    const c = parseFloat(cost);
+    if (!isNaN(v) && v > 0) {
+      if (!isNaN(p) && p > 0) {
+        setCost((v * p).toFixed(2));
+      } else if (!isNaN(c) && c > 0) {
+        setPricePerLiter((c / v).toFixed(2));
+      }
+    }
+  };
+
+  const handleCostChange = (val: string) => {
+    setCost(val);
+    const c = parseFloat(val);
+    const p = parseFloat(pricePerLiter);
+    const v = parseFloat(volume);
+    if (!isNaN(c) && c > 0) {
+      if (!isNaN(p) && p > 0) {
+        setVolume((c / p).toFixed(2));
+      } else if (!isNaN(v) && v > 0) {
+        setPricePerLiter((c / v).toFixed(2));
+      }
+    }
+  };
+
+  // Real-time calculated price per liter display
   const numVolume = parseFloat(volume);
   const numCost = parseFloat(cost);
-  const livePricePerLiter =
-    numVolume > 0 && numCost > 0 ? numCost / numVolume : null;
+  const numPrice = parseFloat(pricePerLiter);
+  const effectivePricePerLiter =
+    !isNaN(numPrice) && numPrice > 0
+      ? numPrice
+      : numVolume > 0 && numCost > 0
+      ? numCost / numVolume
+      : null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +128,12 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({
     const odoNum = parseFloat(odometer);
     const volNum = parseFloat(volume);
     const costNum = parseFloat(cost);
+    const priceNum =
+      !isNaN(numPrice) && numPrice > 0
+        ? numPrice
+        : volNum > 0 && costNum > 0
+        ? costNum / volNum
+        : undefined;
 
     if (isNaN(odoNum) || odoNum <= 0) {
       alert('Please enter a valid odometer reading.');
@@ -107,6 +162,7 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({
         odometer: odoNum,
         volume: volNum,
         cost: costNum,
+        pricePerLiter: priceNum,
         isFullTank,
         station,
         notes: notes.trim() || undefined,
@@ -116,6 +172,7 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({
 
     // Reset entry inputs while keeping date & vehicle
     setOdometer('');
+    setPricePerLiter('');
     setVolume('');
     setCost('');
     setNotes('');
@@ -133,7 +190,7 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({
             Garage is Empty
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-            Register your vehicle first to start logging fill-ups, computing fuel economy (km/L), and tracking expenses in Philippine Pesos (₱).
+            Register your vehicle first to start logging fill-ups, tracking fuel price per liter, and computing fuel economy (km/L).
           </p>
           <div className="pt-2">
             <button
@@ -161,21 +218,22 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({
             Record New Fill-Up
           </h2>
         </div>
-        {livePricePerLiter !== null && (
-          <div className="text-xs bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-lg text-slate-300">
-            Price / L:{' '}
+        {effectivePricePerLiter !== null && (
+          <div className="text-xs bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-lg text-slate-300 flex items-center gap-1.5">
+            <Calculator className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span>Noted Price:</span>
             <span className="font-semibold text-emerald-400 font-mono tabular-nums">
-              {formatPHP(livePricePerLiter)}/L
+              {formatPHP(effectivePricePerLiter)}/L
             </span>
           </div>
         )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Main Input Grid: Optimized for iPhone touch & Desktop 5-col */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+        {/* Row 1: Vehicle, Date, Odometer */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
           {/* Vehicle Select */}
-          <div className="sm:col-span-2 lg:col-span-1">
+          <div>
             <label
               htmlFor={`${formId}-vehicle`}
               className="block text-xs font-semibold text-slate-400 mb-1"
@@ -216,7 +274,7 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({
           </div>
 
           {/* Odometer */}
-          <div>
+          <div className="sm:col-span-2 lg:col-span-1">
             <div className="flex items-center justify-between mb-1">
               <label
                 htmlFor={`${formId}-odometer`}
@@ -247,15 +305,51 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({
               className="w-full min-h-[44px] sm:min-h-[38px] bg-slate-800 border border-slate-700 rounded-xl sm:rounded-lg px-3 py-2 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono tabular-nums"
             />
           </div>
+        </div>
 
-          {/* Fuel Volume & Cost side-by-side on iPhone */}
-          <div className="grid grid-cols-2 gap-3 sm:contents">
+        {/* Row 2: Fuel Pricing & Quantities (Price/L, Liters, Total Paid with Auto-Calculation) */}
+        <div className="p-3.5 sm:p-4 rounded-xl bg-slate-800/40 border border-slate-800 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+              <Fuel className="w-3.5 h-3.5" />
+              Fuel Price & Volume
+            </span>
+            <span className="text-[11px] text-slate-400 hidden sm:inline">
+              Fill any 2 fields to auto-calculate the third
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Price per Liter */}
+            <div>
+              <label
+                htmlFor={`${formId}-price`}
+                className="block text-xs font-semibold text-slate-300 mb-1"
+              >
+                Price / Liter (₱/L)
+              </label>
+              <div className="relative">
+                <input
+                  id={`${formId}-price`}
+                  type="number"
+                  inputMode="decimal"
+                  step="0.01"
+                  min="0.01"
+                  placeholder="e.g. 64.50"
+                  value={pricePerLiter}
+                  onChange={(e) => handlePriceChange(e.target.value)}
+                  className="w-full min-h-[44px] sm:min-h-[38px] bg-slate-800 border border-slate-700 rounded-xl sm:rounded-lg px-3 py-2 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono tabular-nums"
+                />
+              </div>
+            </div>
+
+            {/* Fuel Added */}
             <div>
               <label
                 htmlFor={`${formId}-volume`}
-                className="block text-xs font-semibold text-slate-400 mb-1"
+                className="block text-xs font-semibold text-slate-300 mb-1"
               >
-                Fuel Added (L)
+                Fuel Added (Liters) *
               </label>
               <input
                 id={`${formId}-volume`}
@@ -266,17 +360,18 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({
                 required
                 placeholder="e.g. 42.50"
                 value={volume}
-                onChange={(e) => setVolume(e.target.value)}
+                onChange={(e) => handleVolumeChange(e.target.value)}
                 className="w-full min-h-[44px] sm:min-h-[38px] bg-slate-800 border border-slate-700 rounded-xl sm:rounded-lg px-3 py-2 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono tabular-nums"
               />
             </div>
 
+            {/* Total Paid */}
             <div>
               <label
                 htmlFor={`${formId}-cost`}
-                className="block text-xs font-semibold text-slate-400 mb-1"
+                className="block text-xs font-semibold text-slate-300 mb-1"
               >
-                Total Paid (₱)
+                Total Paid (₱) *
               </label>
               <input
                 id={`${formId}-cost`}
@@ -287,14 +382,14 @@ export const LogEntryForm: React.FC<LogEntryFormProps> = ({
                 required
                 placeholder="e.g. 2650.00"
                 value={cost}
-                onChange={(e) => setCost(e.target.value)}
-                className="w-full min-h-[44px] sm:min-h-[38px] bg-slate-800 border border-slate-700 rounded-xl sm:rounded-lg px-3 py-2 text-base sm:text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono tabular-nums"
+                onChange={(e) => handleCostChange(e.target.value)}
+                className="w-full min-h-[44px] sm:min-h-[38px] bg-slate-800 border border-slate-700 rounded-xl sm:rounded-lg px-3 py-2 text-base sm:text-xs text-emerald-400 font-bold placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono tabular-nums"
               />
             </div>
           </div>
         </div>
 
-        {/* Secondary Row: Station & Notes */}
+        {/* Row 3: Fuel Station & Notes */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-1">
           <div>
             <label

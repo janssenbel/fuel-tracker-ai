@@ -24,6 +24,7 @@ export const EditLogModal: React.FC<EditLogModalProps> = ({
   const [vehicleId, setVehicleId] = useState('');
   const [date, setDate] = useState('');
   const [odometer, setOdometer] = useState('');
+  const [pricePerLiter, setPricePerLiter] = useState('');
   const [volume, setVolume] = useState('');
   const [cost, setCost] = useState('');
   const [isFullTank, setIsFullTank] = useState(true);
@@ -37,6 +38,13 @@ export const EditLogModal: React.FC<EditLogModalProps> = ({
       setOdometer(String(log.odometer ?? ''));
       setVolume(String(log.volume ?? ''));
       setCost(String(log.cost ?? ''));
+      const initialPrice =
+        typeof log.pricePerLiter === 'number' && log.pricePerLiter > 0
+          ? String(log.pricePerLiter)
+          : log.volume > 0 && log.cost > 0
+          ? (log.cost / log.volume).toFixed(2)
+          : '';
+      setPricePerLiter(initialPrice);
       setIsFullTank(log.isFullTank !== false);
       setStation(log.station || 'Petron');
       setNotes(log.notes || '');
@@ -45,15 +53,70 @@ export const EditLogModal: React.FC<EditLogModalProps> = ({
 
   if (!log) return null;
 
+  // Bidirectional calculations for editing
+  const handlePriceChange = (val: string) => {
+    setPricePerLiter(val);
+    const p = parseFloat(val);
+    const v = parseFloat(volume);
+    const c = parseFloat(cost);
+    if (!isNaN(p) && p > 0) {
+      if (!isNaN(v) && v > 0) {
+        setCost((p * v).toFixed(2));
+      } else if (!isNaN(c) && c > 0) {
+        setVolume((c / p).toFixed(2));
+      }
+    }
+  };
+
+  const handleVolumeChange = (val: string) => {
+    setVolume(val);
+    const v = parseFloat(val);
+    const p = parseFloat(pricePerLiter);
+    const c = parseFloat(cost);
+    if (!isNaN(v) && v > 0) {
+      if (!isNaN(p) && p > 0) {
+        setCost((v * p).toFixed(2));
+      } else if (!isNaN(c) && c > 0) {
+        setPricePerLiter((c / v).toFixed(2));
+      }
+    }
+  };
+
+  const handleCostChange = (val: string) => {
+    setCost(val);
+    const c = parseFloat(val);
+    const p = parseFloat(pricePerLiter);
+    const v = parseFloat(volume);
+    if (!isNaN(c) && c > 0) {
+      if (!isNaN(p) && p > 0) {
+        setVolume((c / p).toFixed(2));
+      } else if (!isNaN(v) && v > 0) {
+        setPricePerLiter((c / v).toFixed(2));
+      }
+    }
+  };
+
   const numVol = parseFloat(volume);
   const numCost = parseFloat(cost);
-  const livePricePerLiter = numVol > 0 && numCost > 0 ? numCost / numVol : null;
+  const numPrice = parseFloat(pricePerLiter);
+  const livePricePerLiter =
+    !isNaN(numPrice) && numPrice > 0
+      ? numPrice
+      : numVol > 0 && numCost > 0
+      ? numCost / numVol
+      : null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const odoNum = parseFloat(odometer);
     const volNum = parseFloat(volume);
     const costNum = parseFloat(cost);
+    const priceNum =
+      !isNaN(numPrice) && numPrice > 0
+        ? numPrice
+        : volNum > 0 && costNum > 0
+        ? costNum / volNum
+        : undefined;
 
     if (isNaN(odoNum) || odoNum <= 0) {
       alert('Please enter a valid odometer reading.');
@@ -75,6 +138,7 @@ export const EditLogModal: React.FC<EditLogModalProps> = ({
       odometer: odoNum,
       volume: volNum,
       cost: costNum,
+      pricePerLiter: priceNum,
       isFullTank,
       station,
       notes: notes.trim() || undefined,
@@ -136,7 +200,7 @@ export const EditLogModal: React.FC<EditLogModalProps> = ({
               />
             </div>
 
-            <div>
+            <div className="sm:col-span-2">
               <label className="block text-xs font-semibold text-slate-400 mb-1">
                 Odometer Reading (km)
               </label>
@@ -152,6 +216,23 @@ export const EditLogModal: React.FC<EditLogModalProps> = ({
               />
             </div>
 
+            {/* Fuel Price & Quantities */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-400 mb-1">
+                Price / Liter (₱/L)
+              </label>
+              <input
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min="0.01"
+                placeholder="e.g. 64.50"
+                value={pricePerLiter}
+                onChange={(e) => handlePriceChange(e.target.value)}
+                className="w-full min-h-[44px] sm:min-h-[38px] bg-slate-800 border border-slate-700 rounded-xl sm:rounded-lg px-3 py-2 text-base sm:text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono tabular-nums"
+              />
+            </div>
+
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-1">
                 Fuel Added (Liters)
@@ -163,12 +244,12 @@ export const EditLogModal: React.FC<EditLogModalProps> = ({
                 min="0.01"
                 required
                 value={volume}
-                onChange={(e) => setVolume(e.target.value)}
+                onChange={(e) => handleVolumeChange(e.target.value)}
                 className="w-full min-h-[44px] sm:min-h-[38px] bg-slate-800 border border-slate-700 rounded-xl sm:rounded-lg px-3 py-2 text-base sm:text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono tabular-nums"
               />
             </div>
 
-            <div>
+            <div className="sm:col-span-2">
               <label className="block text-xs font-semibold text-slate-400 mb-1">
                 Total Paid (₱)
               </label>
@@ -179,12 +260,12 @@ export const EditLogModal: React.FC<EditLogModalProps> = ({
                 min="0.01"
                 required
                 value={cost}
-                onChange={(e) => setCost(e.target.value)}
-                className="w-full min-h-[44px] sm:min-h-[38px] bg-slate-800 border border-slate-700 rounded-xl sm:rounded-lg px-3 py-2 text-base sm:text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono tabular-nums"
+                onChange={(e) => handleCostChange(e.target.value)}
+                className="w-full min-h-[44px] sm:min-h-[38px] bg-slate-800 border border-slate-700 rounded-xl sm:rounded-lg px-3 py-2 text-base sm:text-xs text-emerald-400 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono tabular-nums"
               />
             </div>
 
-            <div>
+            <div className="sm:col-span-2">
               <label className="block text-xs font-semibold text-slate-400 mb-1">
                 Fuel Station
               </label>
@@ -204,7 +285,7 @@ export const EditLogModal: React.FC<EditLogModalProps> = ({
 
           {livePricePerLiter !== null && (
             <div className="text-xs bg-slate-800/80 border border-slate-700 px-3 py-2 rounded-xl text-slate-300">
-              Calculated Fuel Price:{' '}
+              Noted Fuel Price:{' '}
               <span className="font-semibold text-emerald-400 font-mono tabular-nums">
                 {formatPHP(livePricePerLiter)} / Liter
               </span>

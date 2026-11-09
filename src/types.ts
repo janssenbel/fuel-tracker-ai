@@ -21,6 +21,7 @@ export interface FuelLog {
   volume: number; // Liters
   cost: number; // PHP (₱)
   isFullTank: boolean;
+  pricePerLiter?: number; // Noted fuel price in ₱/L
   station?: string;
   notes?: string;
   createdAt?: string;
@@ -41,6 +42,7 @@ export interface PeriodSummary {
   totalCost: number;
   avgEconomy: number | null;
   avgCostPerKm: number | null;
+  avgFuelPrice: number | null; // Average fuel cost in ₱/L over time
   count: number;
 }
 
