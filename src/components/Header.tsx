@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <header className="sticky top-0 z-30 header-frosted border-b border-slate-800/80 pb-3 px-3.5 sm:px-6 lg:px-8 transition-colors">
+    <header className="sticky top-0 z-30 header-solid border-b border-slate-800 pb-3 px-3.5 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 sm:gap-3.5">
         {/* Brand Identity */}
         <div className="flex items-center justify-between gap-3">

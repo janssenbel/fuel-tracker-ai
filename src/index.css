@@ -28,10 +28,10 @@
   }
 }
 
-.header-frosted {
-  background-color: rgba(11, 17, 32, 0.82);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  backdrop-filter: saturate(180%) blur(20px);
+.header-solid {
+  background-color: #0b1120;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
   padding-top: max(0.75rem, env(safe-area-inset-top, 0.75rem));
 }
 
