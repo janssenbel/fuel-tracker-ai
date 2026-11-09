@@ -28,7 +28,6 @@ import {
   Car,
   Fuel,
   Gauge,
-  DollarSign,
   TrendingUp,
   Settings,
   PlusCircle,
@@ -661,7 +660,12 @@ export default function App() {
               <p className="text-[11px] text-slate-400 uppercase font-semibold tracking-wider">
                 Total Spent
               </p>
-              <DollarSign className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span
+                className="w-4 h-4 flex items-center justify-center text-sm font-bold text-emerald-400 shrink-0 leading-none select-none"
+                aria-hidden="true"
+              >
+                ₱
+              </span>
             </div>
             <p className="text-xl sm:text-2xl font-bold mt-1 text-emerald-400 font-mono tabular-nums">
               {formatPHP(kpis.totalCost)}
