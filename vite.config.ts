@@ -30,19 +30,19 @@ export default defineConfig(() => {
 
   icons: [
     {
-      src: '/fuel-tracker-ai/pwa-192x192.png',
+      src: '/fuel-tracker-ai/pwa-192x192.png?v=4',
       sizes: '192x192',
       type: 'image/png',
       purpose: 'any',
     },
     {
-      src: '/fuel-tracker-ai/pwa-512x512.png',
+      src: '/fuel-tracker-ai/pwa-512x512.png?v=4',
       sizes: '512x512',
       type: 'image/png',
       purpose: 'any',
     },
     {
-      src: '/fuel-tracker-ai/pwa-maskable-512x512.png',
+      src: '/fuel-tracker-ai/pwa-maskable-512x512.png?v=4',
       sizes: '512x512',
       type: 'image/png',
       purpose: 'maskable',

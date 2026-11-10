@@ -1,47 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="lightGreenBg" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="headerBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#4ade80" />
       <stop offset="100%" stop-color="#10b981" />
     </linearGradient>
   </defs>
 
-  <!-- Full Light Green Background -->
-  <rect width="512" height="512" rx="112" fill="url(#lightGreenBg)" />
+  <!-- Exact Header Badge Background: bg-gradient-to-br from-green-400 (#4ade80) to-emerald-500 (#10b981) -->
+  <rect width="512" height="512" rx="112" fill="url(#headerBgGrad)" />
 
-  <!-- Large White Fuel Pump Icon (Centered & Scaled Up) -->
-  <g transform="translate(24, 16)">
-    <!-- Pump Base -->
-    <rect x="86" y="410" width="248" height="34" rx="17" fill="#ffffff" />
-
-    <!-- Main Fuel Pump Body (White) -->
-    <rect x="110" y="66" width="200" height="352" rx="34" fill="#ffffff" />
-
-    <!-- Pump Display Window (Light Green Cutout) -->
-    <rect x="138" y="98" width="144" height="96" rx="18" fill="#10b981" />
-
-    <!-- Fuel Gauge Drop / Detail inside Display (White) -->
-    <path d="M210 116 C210 116 186 144 186 160 C186 173.255 196.745 184 210 184 C223.255 184 234 173.255 234 160 C234 144 210 116 210 116 Z" fill="#ffffff" />
-
-    <!-- Decorative Panel Accent Line (Light Green Cutout) -->
-    <rect x="142" y="224" width="136" height="18" rx="9" fill="#22c55e" />
-
-    <!-- Large Bold White Fuel Hose & Nozzle -->
-    <path
-      d="M 310 156 H 336 C 362 156 380 174 380 200 V 316 C 380 346 358 366 332 366 C 308 366 292 348 292 322 V 250"
-      fill="none"
-      stroke="#ffffff"
-      stroke-width="32"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-
-    <!-- Nozzle Head & Spout (White) -->
-    <path
-      d="M 336 156 L 386 106 C 396 96 412 96 422 106 L 432 116 C 440 124 440 138 432 146 L 380 198 Z"
-      fill="#ffffff"
-    />
-    <!-- Nozzle Handle Trigger Guard -->
-    <rect x="342" y="152" width="52" height="28" rx="10" transform="rotate(-45 342 152)" fill="#ffffff" />
+  <!-- Exact Lucide <Fuel /> Icon (viewBox 0 0 24 24 scaled to center of 512x512 with stroke-width 2.25) -->
+  <g transform="translate(88, 88) scale(14)" fill="none" stroke="#ffffff" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="3" y1="22" x2="15" y2="22" />
+    <line x1="4" y1="9" x2="14" y2="9" />
+    <path d="M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18" />
+    <path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 2 2a2 2 0 0 0 2-2V9.83a2 2 0 0 0-.59-1.42L18 5" />
   </g>
 </svg>
