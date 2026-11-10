@@ -1,19 +1,25 @@
 @import "tailwindcss";
 
 @layer base {
-  html {
-    -webkit-tap-highlight-color: transparent;
-    -webkit-text-size-adjust: 100%;
-    scroll-behavior: smooth;
-  }
-
+  html,
   body {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+    height: 100%;
+    overflow: hidden;
     background-color: #0b1120;
     color: #f1f5f9;
-    padding-left: env(safe-area-inset-left, 0px);
-    padding-right: env(safe-area-inset-right, 0px);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
     overscroll-behavior-y: none;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  }
+
+  #root {
+    height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    background-color: #0b1120;
   }
 
   .tabular-nums {
@@ -28,23 +34,14 @@
   }
 }
 
-.header-solid {
-  background-color: #0b1120;
+.nav-solid {
+  background-color: #0f172a;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
-  padding-top: max(0.75rem, env(safe-area-inset-top, 0.75rem));
-}
-
-.nav-frosted {
-  background-color: rgba(15, 23, 42, 0.88);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  backdrop-filter: saturate(180%) blur(20px);
 }
 
 .modal-backdrop {
-  background-color: rgba(2, 6, 23, 0.75);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  background-color: rgba(2, 6, 23, 0.8);
 }
 
 .pb-safe {

@@ -528,20 +528,19 @@ export default function App() {
       : 'Selected Vehicle';
 
   return (
-    <div id="section-top" className="min-h-screen bg-[#0b1120] text-slate-100 pb-24 md:pb-10">
-      {/* Sticky Frosted-Glass Top Header */}
-      <Header
-        appName={appName}
-        appSubtitle={appSubtitle}
-        vehicleCount={vehicles.length}
-        onOpenVehicleModal={() => setIsVehicleModalOpen(true)}
-        onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
-        onExportBackup={handleExportBackup}
-        onImportBackup={handleImportBackup}
-      />
-
+    <div id="section-top" className="min-h-full bg-[#0b1120] text-slate-100 pb-24 md:pb-10">
       {/* Main Content Container */}
       <main className="max-w-5xl mx-auto pt-4 sm:pt-6 px-3.5 sm:px-6 lg:px-8 space-y-5 sm:space-y-6">
+        {/* Clean Static Top Header */}
+        <Header
+          appName={appName}
+          appSubtitle={appSubtitle}
+          vehicleCount={vehicles.length}
+          onOpenVehicleModal={() => setIsVehicleModalOpen(true)}
+          onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
+          onExportBackup={handleExportBackup}
+          onImportBackup={handleImportBackup}
+        />
         {/* Vehicle Filter Bar & Quick Switcher */}
         <section className="bg-slate-900/80 border border-slate-800 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-lg">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
@@ -737,7 +736,7 @@ export default function App() {
       {/* iPhone & Mobile Thumb-Zone Bottom Tab Bar */}
       <nav
         aria-label="Mobile quick navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 nav-frosted border-t border-slate-800 pb-safe-nav"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 nav-solid border-t border-slate-800 pb-safe-nav"
       >
         <div className="grid grid-cols-4 items-center h-14 max-w-md mx-auto px-2">
           <button
