@@ -110,8 +110,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         >
           {/* Live Header Preview */}
           <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800/90 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-              <Fuel className="w-4 h-4" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 shadow-sm flex items-center justify-center text-white shrink-0">
+              <Fuel className="w-6 h-6 stroke-[2.25]" />
             </div>
             <div className="min-w-0">
               <div className="flex items-baseline gap-2">

@@ -34,8 +34,8 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Brand Identity */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-              <Fuel className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 shadow-sm flex items-center justify-center text-white shrink-0">
+              <Fuel className="w-6 h-6 sm:w-7 sm:h-7 stroke-[2.25]" />
             </div>
             <div className="min-w-0">
               <div className="flex items-baseline gap-2">
