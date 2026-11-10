@@ -2,24 +2,19 @@
 
 @layer base {
   html,
-  body {
-    height: 100%;
+  body,
+  #root {
+    height: 100dvh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
     overflow: hidden;
     background-color: #0b1120;
     color: #f1f5f9;
     -webkit-tap-highlight-color: transparent;
     -webkit-text-size-adjust: 100%;
-    overscroll-behavior-y: none;
+    overscroll-behavior: none;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
-  }
-
-  #root {
-    height: 100dvh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-    background-color: #0b1120;
   }
 
   .tabular-nums {
@@ -31,6 +26,31 @@
     -webkit-appearance: none;
     appearance: none;
     min-height: 44px;
+  }
+}
+
+/* Fixed top header with extra top offset below iPhone status bar / Dynamic Island and zero blur */
+.header-fixed-top {
+  background-color: #0b1120;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  padding-top: calc(env(safe-area-inset-top, 0px) + 1.25rem);
+  padding-left: max(0.875rem, env(safe-area-inset-left, 0.875rem));
+  padding-right: max(0.875rem, env(safe-area-inset-right, 0.875rem));
+}
+
+@media (min-width: 640px) {
+  .header-fixed-top {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 1.25rem);
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .header-fixed-top {
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 }
 

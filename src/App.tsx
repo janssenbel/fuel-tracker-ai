@@ -514,6 +514,13 @@ export default function App() {
 
   const scrollToSection = (id: string, tab: 'form' | 'summary' | 'history') => {
     setActiveMobileTab(tab);
+    if (id === 'section-top') {
+      const container = document.getElementById('main-scroll-container');
+      if (container) {
+        container.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+    }
     const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -528,19 +535,27 @@ export default function App() {
       : 'Selected Vehicle';
 
   return (
-    <div id="section-top" className="min-h-full bg-[#0b1120] text-slate-100 pb-24 md:pb-10">
-      {/* Main Content Container */}
-      <main className="max-w-5xl mx-auto pt-4 sm:pt-6 px-3.5 sm:px-6 lg:px-8 space-y-5 sm:space-y-6">
-        {/* Clean Static Top Header */}
-        <Header
-          appName={appName}
-          appSubtitle={appSubtitle}
-          vehicleCount={vehicles.length}
-          onOpenVehicleModal={() => setIsVehicleModalOpen(true)}
-          onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
-          onExportBackup={handleExportBackup}
-          onImportBackup={handleImportBackup}
-        />
+    <div className="h-[100dvh] flex flex-col overflow-hidden bg-[#0b1120] text-slate-100">
+      {/* Stationary Fixed Top Header (sits lower below status bar, never blurs or scrolls away) */}
+      <Header
+        appName={appName}
+        appSubtitle={appSubtitle}
+        vehicleCount={vehicles.length}
+        onOpenVehicleModal={() => setIsVehicleModalOpen(true)}
+        onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
+        onExportBackup={handleExportBackup}
+        onImportBackup={handleImportBackup}
+      />
+
+      {/* Independently Scrollable Main Content Container */}
+      <main
+        id="main-scroll-container"
+        className="flex-1 overflow-y-auto overflow-x-hidden scroll-smooth"
+      >
+        <div
+          id="section-top"
+          className="max-w-5xl mx-auto pt-4 sm:pt-6 pb-24 md:pb-10 px-3.5 sm:px-6 lg:px-8 space-y-5 sm:space-y-6"
+        >
         {/* Vehicle Filter Bar & Quick Switcher */}
         <section className="bg-slate-900/80 border border-slate-800 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-lg">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5 w-full sm:w-auto">
@@ -731,6 +746,7 @@ export default function App() {
             Trip distances and fuel economy are strictly isolated per vehicle odometer stream.
           </p>
         </footer>
+        </div>
       </main>
 
       {/* iPhone & Mobile Thumb-Zone Bottom Tab Bar */}
